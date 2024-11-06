@@ -6,7 +6,10 @@ use cairo_vm::types::layout_name::LayoutName;
 use cairo_vm::vm::runners::cairo_pie::CairoPie;
 use cairo_vm::Felt252;
 use clap::Parser;
-use prove_block::{debug_prove_error, get_memory_segment, prove_block, DEFAULT_COMPILED_OS};
+use prove_block::{debug_prove_error, get_memory_segment, prove_block};
+
+pub const DEFAULT_COMPILED_OS: &[u8] = include_bytes!("../../../../build/os_latest.json");
+
 
 #[derive(Parser, Debug)]
 struct Args {

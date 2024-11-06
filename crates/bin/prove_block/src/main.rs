@@ -1,6 +1,9 @@
 use cairo_vm::types::layout_name::LayoutName;
 use clap::Parser;
-use prove_block::{debug_prove_error, DEFAULT_COMPILED_OS};
+use prove_block::debug_prove_error;
+
+pub const DEFAULT_COMPILED_OS: &[u8] = include_bytes!("../../../../build/os_latest.json");
+
 
 #[derive(Parser, Debug)]
 struct Args {
