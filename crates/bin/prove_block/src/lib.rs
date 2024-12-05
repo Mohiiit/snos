@@ -48,8 +48,6 @@ mod state_utils;
 mod types;
 mod utils;
 
-pub const DEFAULT_COMPILED_OS: &[u8] = include_bytes!("../../../../build/os_latest.json");
-
 #[derive(Debug, Error)]
 pub enum ProveBlockError {
     #[error("RPC Error: {0}")]
@@ -184,7 +182,8 @@ pub async fn prove_block(
                 .await?;
         txs.push(transaction);
     }
-    let tx_execution_infos = reexecute_transactions_with_blockifier(&mut blockifier_state, &block_context, txs)?;
+    let tx_execution_infos =
+        reexecute_transactions_with_blockifier(&mut blockifier_state, &block_context, old_block_hash, txs)?;
 
     let storage_proofs = get_storage_proofs(&rpc_client, block_number, &tx_execution_infos, old_block_number)
         .await
@@ -310,8 +309,15 @@ pub async fn prove_block(
     let updated_root = block_hash_storage_proof.class_commitment.unwrap_or(Felt::ZERO);
     let previous_root = previous_block_hash_storage_proof.class_commitment.unwrap_or(Felt::ZERO);
 
-    let previous_contract_trie_root = previous_block_hash_storage_proof.contract_proof[0].hash::<PedersenHash>();
-    let current_contract_trie_root = block_hash_storage_proof.contract_proof[0].hash::<PedersenHash>();
+    // On devnet and until block 10, the storage_root_idx might be None and that means that contract_proof is empty
+    let previous_contract_trie_root = match previous_block_hash_storage_proof.contract_proof.first() {
+        Some(proof) => proof.hash::<PedersenHash>(),
+        None => Felt252::ZERO,
+    };
+    let current_contract_trie_root = match block_hash_storage_proof.contract_proof.first() {
+        Some(proof) => proof.hash::<PedersenHash>(),
+        None => Felt252::ZERO,
+    };
 
     let previous_contract_proofs: Vec<_> =
         previous_storage_proofs.values().map(|proof| proof.contract_proof.clone()).collect();
