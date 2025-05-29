@@ -101,7 +101,7 @@ fn deserialize_serialize_pie() {
 
     let path_write =
         Path::new(env!("CARGO_MANIFEST_DIR")).join("integration").join("common").join("data").join("173404_test.zip");
-    pie_read.write_zip_file(&path_write).expect("Could not write pie");
+    pie_read.write_zip_file(&path_write, true).expect("Could not write pie");
     let pie_write = CairoPie::read_zip_file(&path_write).unwrap();
 
     pie_write.check_pie_compatibility(&pie_read).expect("Compatible pies");
